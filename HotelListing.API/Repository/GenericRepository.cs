@@ -1,38 +1,54 @@
 ﻿using HotelListing.API.Contract;
+using HotelListing.API.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace HotelListing.API.Repository
 {
     public class GenericRepository<T> : IGenericRepository<T> where T : class
     {
-
-        public Task<T> AddAsync(T entity)
+        private readonly HotelListingDbContext _hotelListingDbContext;
+        public GenericRepository(HotelListingDbContext hotelListingDbContext)
         {
-            throw new NotImplementedException();
+            _hotelListingDbContext = hotelListingDbContext;
+        }
+        public async Task<T> AddAsync(T entity)
+        {
+          await _hotelListingDbContext.AddAsync(entity);
+          await _hotelListingDbContext.SaveChangesAsync();
+            return entity;
         }
 
-        public Task DeleteAsync(int id)
+        public async Task DeleteAsync(int id)
         {
-            throw new NotImplementedException();
+            var entity = await GetAsync(id);
+            _hotelListingDbContext.Set<T>().Remove(entity);
+            await _hotelListingDbContext.SaveChangesAsync();
+
         }
 
-        public Task<bool> Exists(int id)
+        public async Task<bool> Exists(int id)
         {
-            throw new NotImplementedException();
+            var entity = await GetAsync(id);
+            return entity != null;
         }
 
-        public Task<List<T>> GetAllAsync()
+        public async Task<List<T>> GetAllAsync()
         {
-            throw new NotImplementedException();
+            return await _hotelListingDbContext.Set<T>().ToListAsync();
         }
 
-        public Task<T> GetAsync(int? id)
+        public async Task<T> GetAsync(int? id)
         {
-            throw new NotImplementedException();
+            if (id is null)
+                return null;
+
+            return await _hotelListingDbContext.Set<T>().FindAsync(id);
         }
 
-        public Task UpdateAsync(T entity)
+        public async Task UpdateAsync(T entity)
         {
-            throw new NotImplementedException();
+            _hotelListingDbContext.Update(entity);
+           await _hotelListingDbContext.SaveChangesAsync();
         }
     }
 }
