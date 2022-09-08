@@ -13,5 +13,7 @@
         Task UpdateAsync(T entity);
 
         Task<bool> Exists(int id);
+
+        bool TableExist();
     }
 }

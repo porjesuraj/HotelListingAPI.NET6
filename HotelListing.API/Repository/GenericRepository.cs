@@ -45,10 +45,19 @@ namespace HotelListing.API.Repository
             return await _hotelListingDbContext.Set<T>().FindAsync(id);
         }
 
-        public async Task UpdateAsync(T entity)
+        public  bool TableExist()
         {
-            _hotelListingDbContext.Update(entity);
-           await _hotelListingDbContext.SaveChangesAsync();
+            var result =  _hotelListingDbContext.Set<T>() != null;
+            return result;
+        }
+
+        public async Task UpdateAsync(T entity)
+        {           
+                _hotelListingDbContext.Update(entity);
+                await _hotelListingDbContext.SaveChangesAsync();
+
+            
+   
         }
     }
 }
