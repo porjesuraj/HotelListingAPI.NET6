@@ -30,6 +30,7 @@ builder.Services.AddCors(options =>
 builder.Services.AddAutoMapper(typeof(AutoMapperConfig));
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 builder.Services.AddScoped<ICountriesRepository, CountriesRepository>();
+builder.Services.AddScoped<IHotelsRepository, HotelsRepository>();
 
 builder.Host.UseSerilog((context,lc) => lc.WriteTo.Console().ReadFrom.Configuration(context.Configuration));
 var app = builder.Build();

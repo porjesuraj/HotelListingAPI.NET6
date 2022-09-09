@@ -26,7 +26,7 @@ namespace HotelListing.API.Repository
 
         }
 
-        public async Task<bool> Exists(int id)
+        public async Task<bool> RowExists(int id)
         {
             var entity = await GetAsync(id);
             return entity != null;
