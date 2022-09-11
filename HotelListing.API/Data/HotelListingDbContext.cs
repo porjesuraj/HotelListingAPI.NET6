@@ -1,8 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using HotelListing.API.Data.Configurations;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 
 namespace HotelListing.API.Data
 {
-    public class HotelListingDbContext:DbContext
+    public class HotelListingDbContext: IdentityDbContext<ApiUser>
     {
         public HotelListingDbContext(DbContextOptions options): base(options)
         {
@@ -14,61 +16,17 @@ namespace HotelListing.API.Data
         public DbSet<Country> Countries { get; set; }
 
 
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+            modelBuilder.ApplyConfiguration(new RoleConfiguration());
+            modelBuilder.ApplyConfiguration(new HotelsConfiguration());
+            modelBuilder.ApplyConfiguration(new CountriesConfiguration());
 
-            modelBuilder.Entity<Hotel>().HasData(
 
-                new Hotel
-                {
-                    Id = 1,
-                    Name = "Hyatt",
-                    Address ="Pune",
-                    CountryId = 91,
-                    Rating = 4.5
-                },
-                  new Hotel
-                  {
-                      Id = 2,
-                      Name = "Mariot",
-                      Address = "New York",
-                      CountryId = 01,
-                      Rating = 4
-                  },
-                   new Hotel
-                   {
-                       Id = 3,
-                       Name = "Trident",
-                       Address = "Berlin",
-                       CountryId = 05,
-                       Rating = 5
-                   }
 
-                );
 
-            modelBuilder.Entity<Country>().HasData(
-                new Country
-                {
-                    Id =91,
-                    Name = "India",
-                    ShortName = "IND"
-
-                },
-                new Country
-                {
-                    Id = 01,
-                    Name = "United State of America",
-                    ShortName = "USA"
-                },
-                new Country
-                {
-                    Id = 05,
-                    Name = "Germany",
-                    ShortName ="GER"
-                }
-                
-                );
         }
     }
 }
