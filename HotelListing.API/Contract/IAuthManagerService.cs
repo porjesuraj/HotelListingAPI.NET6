@@ -10,5 +10,9 @@ namespace HotelListing.API.Contract
         Task<AuthResponseDto> LoginAsync(LoginDto loginDto);
         Task<string> GenerateToken(ApiUser apiUser);
 
+        Task<string> CreateRefreshTokenAsync();
+
+        Task<AuthResponseDto> VerifyRefreshToken(AuthResponseDto request);
+
     }
 }
