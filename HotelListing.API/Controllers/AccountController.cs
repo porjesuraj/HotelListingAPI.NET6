@@ -10,9 +10,11 @@ namespace HotelListing.API.Controllers
     public class AccountController : ControllerBase
     {
         private readonly IAuthManagerService _authManagerService;
-        public AccountController(IAuthManagerService authManagerService)
+        private readonly ILogger<AccountController> _logger;
+        public AccountController(IAuthManagerService authManagerService, ILogger<AccountController> logger)
         {
             _authManagerService = authManagerService;
+            _logger = logger;
 
         }
         // POST: api/Account/register
@@ -24,18 +26,32 @@ namespace HotelListing.API.Controllers
 
         public async Task<ActionResult> Register([FromBody]ApiUserDto aPiUserDto)
         {
-            IEnumerable<IdentityError> errors = await _authManagerService.RegisterAsync(aPiUserDto);
-
-            if(errors.Any())
+            try
             {
-                foreach (var error in errors)
+                _logger.LogInformation($"Registeration attempt for {aPiUserDto.Email}");
+                IEnumerable<IdentityError> errors = await _authManagerService.RegisterAsync(aPiUserDto);
+
+                if (errors.Any())
                 {
-                    ModelState.AddModelError(error.Code, error.Description);
+                    foreach (var error in errors)
+                    {
+                        ModelState.AddModelError(error.Code, error.Description);
+                    }
+                    _logger.LogWarning($"Something went wrong while registering user {ModelState.ToString()}");
+                    return BadRequest(ModelState);
+
                 }
-                return BadRequest(ModelState);
+                return Ok();
 
             }
-            return Ok();
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Something went wrong in the {nameof(Register)} - User Registeration attempt for {aPiUserDto.Email}");
+
+                return Problem($"Something went wrong in the {nameof(Register)}. Please contact support.", statusCode: 500);
+    
+            }
+          
            
         }
 
@@ -49,13 +65,26 @@ namespace HotelListing.API.Controllers
 
         public async Task<ActionResult> Login([FromBody] LoginDto loginDto)
         {
+            try
+            {
+                _logger.LogInformation($"Login attempt by {loginDto.Email}");
+                var authResponse = await _authManagerService.LoginAsync(loginDto);
 
-            var authResponse= await _authManagerService.LoginAsync(loginDto);
+                if (authResponse is not null)
+                    return Ok(authResponse);
 
-            if(authResponse is not null)
-                return Ok(authResponse);
+                return Unauthorized();
 
-            return Unauthorized();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"something went wrong in {nameof(Login)} while user {loginDto.Email} tried to log");
+
+                return Problem($"something went wrong in {nameof(Login)}", statusCode: 500);
+                
+            }
+
+           
 
         }
 
