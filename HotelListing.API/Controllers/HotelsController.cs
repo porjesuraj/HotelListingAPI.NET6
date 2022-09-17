@@ -11,12 +11,12 @@ using HotelListing.API.Contract;
 using AutoMapper;
 using HotelListing.API.Models.Country;
 using Microsoft.AspNetCore.Authorization;
+using HotelListing.API.Models.Query;
 
 namespace HotelListing.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
     public class HotelsController : ControllerBase
     {
         #region Private Variable
@@ -45,6 +45,21 @@ namespace HotelListing.API.Controllers
             var hotels = await _context.GetAllAsync();
             var hoteldto = _mapper.Map<List<HotelDto>>(hotels);
             return Ok(hoteldto);
+
+        }
+
+        // GET: api/Hotels
+        [HttpGet("GetPaged")]
+        public async Task<ActionResult<PageResult<HotelDto>>> GetPagedHotels( [FromQuery]QueryParameters queryParameters)
+        {
+            if (!_context.TableExist())
+            {
+                return NotFound();
+            }
+
+            var pageResult = await _context.GetAllAsync<HotelDto>(queryParameters);
+   
+            return Ok(pageResult);
 
         }
 

@@ -12,6 +12,7 @@ using AutoMapper;
 using HotelListing.API.Contract;
 using Microsoft.AspNetCore.Authorization;
 using HotelListing.API.Exceptions;
+using Microsoft.AspNetCore.OData.Query;
 
 namespace HotelListing.API.Controllers
 {
@@ -29,7 +30,8 @@ namespace HotelListing.API.Controllers
         }
 
         // GET: api/Countries
-        [HttpGet]       
+        [HttpGet]
+        [EnableQuery]
         public async Task<ActionResult<IEnumerable<GetCountryDto>>> GetCountries()
         {
             if (!_countriesRepository.TableExist())
