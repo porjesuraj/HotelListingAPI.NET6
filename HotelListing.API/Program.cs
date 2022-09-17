@@ -15,20 +15,27 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 
+#region Configure Db
 var connectionString = builder.Configuration.GetConnectionString("HotelListingDbConnectionString");
 builder.Services.AddDbContext<HotelListingDbContext>(options =>
 {
     options.UseSqlServer(connectionString);
 });
+#endregion
 
+
+#region Identity Core
 builder.Services.AddIdentityCore<ApiUser>()
                 .AddRoles<IdentityRole>()
                 .AddTokenProvider<DataProtectorTokenProvider<ApiUser>>(StringConstants.LOGIN_PROVIDER)
                 .AddEntityFrameworkStores<HotelListingDbContext>()
                 .AddDefaultTokenProviders();
 
+#endregion
+
+
+#region Services
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -41,10 +48,19 @@ builder.Services.AddCors(options =>
                                         .AllowAnyMethod());
 });
 
+builder.Services.AddAutoMapper(typeof(AutoMapperConfig));
+builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+builder.Services.AddScoped<ICountriesRepository, CountriesRepository>();
+builder.Services.AddScoped<IHotelsRepository, HotelsRepository>();
+builder.Services.AddScoped<IAuthManagerService, AutoManagerService>();
+#endregion
+
+
+#region API Verioning
 builder.Services.AddApiVersioning(options =>
 {
     options.AssumeDefaultVersionWhenUnspecified = true;
-    options.DefaultApiVersion = new Microsoft.AspNetCore.Mvc.ApiVersion(1,0);
+    options.DefaultApiVersion = new Microsoft.AspNetCore.Mvc.ApiVersion(1, 0);
     options.ReportApiVersions = true;
     options.ApiVersionReader = ApiVersionReader.Combine(
         new QueryStringApiVersionReader("api-version"),
@@ -58,13 +74,12 @@ builder.Services.AddVersionedApiExplorer(options =>
     options.GroupNameFormat = "'v'VVV";
     options.SubstituteApiVersionInUrl = true;
 });
+#endregion
 
-builder.Services.AddAutoMapper(typeof(AutoMapperConfig));
-builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
-builder.Services.AddScoped<ICountriesRepository, CountriesRepository>();
-builder.Services.AddScoped<IHotelsRepository, HotelsRepository>();
-builder.Services.AddScoped<IAuthManagerService, AutoManagerService>();
 
+
+
+#region Authentication
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme; //"Bearer"
@@ -84,10 +99,24 @@ builder.Services.AddAuthentication(options =>
 
     };
 });
+#endregion
 
-builder.Host.UseSerilog((context,lc) => lc.WriteTo.Console().ReadFrom.Configuration(context.Configuration));
+#region Caching
+builder.Services.AddResponseCaching(options =>
+{
+    options.MaximumBodySize = 1024;
+    options.UseCaseSensitivePaths = true;
+});
+#endregion
+#region Logging
+builder.Host.UseSerilog((context, lc) => lc.WriteTo.Console().ReadFrom.Configuration(context.Configuration));
+
+#endregion
+
 var app = builder.Build();
 
+
+#region Configure HTTP Pipeline 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -98,6 +127,23 @@ if (app.Environment.IsDevelopment())
 app.UseMiddleware<ExceptionMiddleware>();
 app.UseHttpsRedirection();
 app.UseCors("AllowAll");
+
+app.UseResponseCaching();
+
+app.Use(async (context, next) =>
+{
+    context.Response.GetTypedHeaders().CacheControl =
+    new Microsoft.Net.Http.Headers.CacheControlHeaderValue()
+    {
+        Public = true,
+        MaxAge = TimeSpan.FromSeconds(10)
+    };
+
+ context.Response.Headers[Microsoft.Net.Http.Headers.HeaderNames.Vary] = new string[] { "Accept-Encoding" };
+
+    await next();
+});
+
 app.UseAuthentication();
 
 app.UseAuthorization();
@@ -105,3 +151,5 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+#endregion
+
