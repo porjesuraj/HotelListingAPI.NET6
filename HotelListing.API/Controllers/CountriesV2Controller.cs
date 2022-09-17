@@ -17,20 +17,19 @@ namespace HotelListing.API.Controllers
 {
     [Route("api/v{version:apiVersion}/countries")]
     [ApiController]
-    [ApiVersion("1.0",Deprecated =true)]
-    public class CountriesController : ControllerBase
+    [ApiVersion("2")]
+    public class CountriesV2Controller : ControllerBase
     {
         private readonly IMapper _mapper;
         private readonly ICountriesRepository _countriesRepository;
-        public CountriesController(ICountriesRepository countriesRepository, IMapper mapper)
+        public CountriesV2Controller(ICountriesRepository countriesRepository, IMapper mapper)
         {
             _countriesRepository = countriesRepository;
             _mapper = mapper;
         }
 
         // GET: api/Countries
-        [HttpGet]
-        [Authorize]
+        [HttpGet]       
         public async Task<ActionResult<IEnumerable<GetCountryDto>>> GetCountries()
         {
             if (!_countriesRepository.TableExist())
@@ -50,7 +49,7 @@ namespace HotelListing.API.Controllers
         }
 
         // GET: api/Countries/5
-        [Authorize]
+       
         [HttpGet("{id}")]
         public async Task<ActionResult<CountryDetailsDto>> GetCountry(int id)
         {
