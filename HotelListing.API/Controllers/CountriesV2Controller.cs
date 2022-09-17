@@ -6,13 +6,14 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using HotelListing.API.Data;
-using HotelListing.API.Models.Country;
-using HotelListing.API.Configuration;
+using HotelListing.API.Core.Models.Country;
+using HotelListing.API.Core.Configuration;
 using AutoMapper;
-using HotelListing.API.Contract;
+using HotelListing.API.Core.Contract;
 using Microsoft.AspNetCore.Authorization;
-using HotelListing.API.Exceptions;
+using HotelListing.API.Core.Exceptions;
 using Microsoft.AspNetCore.OData.Query;
+using HotelListing.API.Core;
 
 namespace HotelListing.API.Controllers
 {
@@ -75,7 +76,7 @@ namespace HotelListing.API.Controllers
 
         // PUT: api/Countries/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [Authorize(Roles = Constants.StringConstants.ADMIN_ROLE)]
+        [Authorize(Roles = Core.Constants.StringConstants.ADMIN_ROLE)]
         [HttpPut("{id}")]      
         public async Task<IActionResult> PutCountry(int id, UpdateCountryDto updateCountryDto)
         {
@@ -102,7 +103,7 @@ namespace HotelListing.API.Controllers
 
         // POST: api/Countries
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [Authorize(Roles = Constants.StringConstants.ADMIN_ROLE)]
+        [Authorize(Roles = Core.Constants.StringConstants.ADMIN_ROLE)]
         [HttpPost]
         public async Task<ActionResult<Country>> PostCountry(CreateCountryDto createCountryDto)
         {
@@ -118,7 +119,7 @@ namespace HotelListing.API.Controllers
         }
 
         // DELETE: api/Countries/5
-        [Authorize(Roles = Constants.StringConstants.ADMIN_ROLE)]
+        [Authorize(Roles = Core.Constants.StringConstants.ADMIN_ROLE)]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCountry(int id)
         {
