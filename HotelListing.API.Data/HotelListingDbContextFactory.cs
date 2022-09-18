@@ -4,7 +4,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace HotelListing.API.Data
 {
-    public class HotelListingDbContextFactory : IDesignTimeDbContextFactory<HotelListingDbContext>
+   /* public class HotelListingDbContextFactory : IDesignTimeDbContextFactory<HotelListingDbContext>
     {
         public HotelListingDbContext CreateDbContext(string[] args)
         {
@@ -17,5 +17,5 @@ namespace HotelListing.API.Data
             optionsBuilder.UseSqlServer(config.GetConnectionString("HotelListingDbConnectionString"));
             return new HotelListingDbContext(optionsBuilder.Options);
         }
-    }
+    }*/
 }

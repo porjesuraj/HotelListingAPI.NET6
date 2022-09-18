@@ -23,14 +23,12 @@ namespace HotelListing.API.Controllers
     {
         #region Private Variable
         private readonly IHotelsRepository _context;
-        private readonly IMapper _mapper;
         #endregion
 
         #region Constructor
         public HotelsController(IHotelsRepository context, IMapper mapper)
         {
             _context = context;
-            _mapper = mapper;
         }
         #endregion
 
@@ -44,9 +42,8 @@ namespace HotelListing.API.Controllers
                 return NotFound();
             }
 
-            var hotels = await _context.GetAllAsync();
-            var hoteldto = _mapper.Map<List<HotelDto>>(hotels);
-            return Ok(hoteldto);
+            var hotels = await _context.GetAllAsync<HotelDto>();
+            return Ok(hotels);
 
         }
 
@@ -73,15 +70,11 @@ namespace HotelListing.API.Controllers
             {
                 return NotFound();
             }
-            var hotel = await _context.GetAsync(id) ;
+            var hotel = await _context.GetAsync<GetHotelDetailsDto>(id) ;
 
-            if (hotel == null)
-            {
-                return NotFound();
-            }
-            var hotelDetailsDto = _mapper.Map<GetHotelDetailsDto>(hotel);
 
-            return Ok(hotelDetailsDto);
+
+            return Ok(hotel);
         }
 
         // PUT: api/Hotels/5
@@ -93,18 +86,12 @@ namespace HotelListing.API.Controllers
             {
                 return NotFound();
             }
-            if (id != hotel.Id)
-            {
-                return BadRequest();
-            }
-
 
             try
             {
-                var hotelEntity = await _context.GetAsync(hotel.Id);
-                var hotelDetailsDto = _mapper.Map(hotel, hotelEntity);
 
-                await _context.UpdateAsync(hotelEntity);
+
+                await _context.UpdateAsync(id,hotel);
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -130,9 +117,7 @@ namespace HotelListing.API.Controllers
             {
                 return NotFound();
             }
-
-           var hotelEntity = _mapper.Map<Hotel>(hotelDto);
-          var record = await _context.AddAsync(hotelEntity);
+          var record = await _context.AddAsync<CreateHotelDto, HotelDto>(hotelDto);
 
             return CreatedAtAction("GetHotel", new { id = record.Id }, record);
         }
@@ -145,16 +130,7 @@ namespace HotelListing.API.Controllers
             {
                 return NotFound();
             }
-
-            var hotel = await _context.GetAsync(id);
-            if (hotel == null)
-            {
-                return NotFound();
-            }
-
           await  _context.DeleteAsync(id);
-
-
             return NoContent();
         }
 
